@@ -110,7 +110,7 @@ catkin_package(
     INCLUDE_DIRS include
     LIBRARIES gazebo_ros_pulson
     CATKIN_DEPENDS roscpp std_msgs tf gazebo_ros hector_gazebo_plugins pulson_ros
-    DEPENDS gazebo
+    DEPENDS gazebo yaml-cpp
     )
 
 ###########
@@ -149,6 +149,7 @@ add_library(gazebo_ros_pulson
 target_link_libraries(gazebo_ros_pulson
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
+  yaml-cpp
 )
 
 #############

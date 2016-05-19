@@ -10,7 +10,7 @@ namespace gazebo
     void GazeboRosUwb::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     {
 
-        world = _model->GetWorld();
+        world_ = _model->GetWorld();
 
         //////////////////////// Load Params /////////////////////////////
 
@@ -25,13 +25,13 @@ namespace gazebo
 
         if (!_sdf->HasElement("bodyName"))
         {
-            link = _model->GetLink();
-            link_name_ = link->GetName();
+            link_ = _model->GetLink();
+            link_name_ = link_->GetName();
         }
         else
         {
             link_name_ = _sdf->GetElement("bodyName")->GetValue()->GetAsString();
-            link = _model->GetLink(link_name_);
+            link_ = _model->GetLink(link_name_);
         }
 
         if (!link)
@@ -42,6 +42,33 @@ namespace gazebo
 
         ////////////////////////// defaults ///////////////////////////////
 
+        if (_sdf->HasElement("topicName"))
+        {
+            range_topic_ = _sdf->GetElement("topicName")->GetValue()->GetAsString();
+        }
+        else
+        {
+            range_topic_ = "ranges";
+        }
+
+        if (_sdf->HasElement("beaconMapFile"))
+        {
+            beacon_map_file_ = _sdf->GetElement("beaconMapFile")->GetValue()->GetAsString();
+        }
+        else
+        {
+            ROS_FATAL("GazeboRosUwb plugin requires a beaconMapFile\n");
+            return;
+        }
+
+    }
+
+    void GazeboRosUwb::Reset(){}
+
+    void GazeboRosUwb::Update(){}
+
+    void GazeboRosUwb::ParseBeaconMapFile(std::string f)
+    {
     }
 
     GZ_REGISTER_MODEL_PLUGIN(GazeboRosUwb)
