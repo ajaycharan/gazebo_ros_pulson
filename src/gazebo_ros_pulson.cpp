@@ -3,11 +3,11 @@
 namespace gazebo
 {
 
-    GazeboRosUwb::GazeboRosUwb(){}
+    GazeboRosPulson::GazeboRosPulson(){}
 
-    GazeboRosUwb::~GazeboRosUwb(){}
+    GazeboRosPulson::~GazeboRosPulson(){}
 
-    void GazeboRosUwb::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+    void GazeboRosPulson::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     {
 
         world_ = _model->GetWorld();
@@ -36,7 +36,7 @@ namespace gazebo
 
         if (!link)
         {
-            ROS_FATAL("GazeboRosUwb plugin error bodyName: %s does not exist\n", link_name_.c_str());
+            ROS_FATAL("GazeboRosPulson plugin error bodyName: %s does not exist\n", link_name_.c_str());
             return;
         }
 
@@ -51,26 +51,79 @@ namespace gazebo
             range_topic_ = "ranges";
         }
 
+        std::string beacon_map_file;
         if (_sdf->HasElement("beaconMapFile"))
         {
-            beacon_map_file_ = _sdf->GetElement("beaconMapFile")->GetValue()->GetAsString();
+            beacon_map_file = _sdf->GetElement("beaconMapFile")->GetValue()->GetAsString();
         }
         else
         {
-            ROS_FATAL("GazeboRosUwb plugin requires a beaconMapFile\n");
+            ROS_FATAL("GazeboRosPulson plugin requires a beaconMapFile\n");
             return;
         }
 
+        int r = ParseBeaconMapFile(beacon_map_file);
+        if (r != 0)
+        {
+            ROS_ERROR("GazeboRosPulson plugin can not open beaconMapFile\n");
+            return;
+        }
+
+        range_error_model_.Load(_sdf);
+
+        ////////////////////////// ROS ////////////////////////////////
+
+        if (!ros::isInitialized())
+        {
+            ROS_FATAL("A ROS node for Gazebo has not been initialized, unable to load plugin.\n");
+            return;
+        }
+
+        nh_ = new ros::NodeHandle(namespace_);
+        range_pub_ = nh_->advertise<pulson_ros::RangeMeasurement>(range_topic_, 1000);
+
+        Reset();
+
+        updateTimer_.setUpdateRate(120.0); // make a parameter
+        updateTimer_.Load(world_, _sdf);
+
+        /////////////////////////////////////////////////////////////////
+        
+        updateConnection_ = updateTimer_.Connect(boost::bind(&GazeboRosPulson::Update, this));
+
     }
 
-    void GazeboRosUwb::Reset(){}
+    void GazeboRosPulson::Reset(){}
 
-    void GazeboRosUwb::Update(){}
+    void GazeboRosPulson::Update(){}
 
-    void GazeboRosUwb::ParseBeaconMapFile(std::string f)
+    int GazeboRosPulson::ParseBeaconMapFile(std::string f)
     {
+        // open file
+        std::fstream fs;
+        fs.open(f.c_str());
+        if (!fs.is_open())
+            return -1;
+        YAML::Node map = YAML::LoadFile(f.c_str());
+        assert(map.IsSequence());
+
+        // read beacon locations
+        for (int i = 0; i < map.size(); i++)
+        {
+            beacon b;
+            b.x = (double) map[i]["x"].as<double>();
+            b.y = (double) map[i]["y"].as<double>();
+            b.z = (double) map[i]["z"].as<double>();
+            b.id = (int) map[i]["id"].as<int>();
+
+            beacons_.push_back(b);
+        }
+
+        // close file
+        fs.close();
+        return 0;
     }
 
-    GZ_REGISTER_MODEL_PLUGIN(GazeboRosUwb)
+    GZ_REGISTER_MODEL_PLUGIN(GazeboRosPulson)
 }
 
