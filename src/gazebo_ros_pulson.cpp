@@ -5,7 +5,15 @@ namespace gazebo
 
     GazeboRosPulson::GazeboRosPulson(){}
 
-    GazeboRosPulson::~GazeboRosPulson(){}
+    GazeboRosPulson::~GazeboRosPulson()
+    {
+        // disconnect timer
+        updateTimer_.Disconnect(updateConnection_);
+
+        // cleanup ros
+        nh_->shutdown();
+        delete nh_;
+    }
 
     void GazeboRosPulson::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     {
@@ -48,6 +56,16 @@ namespace gazebo
         else
         {
             range_topic_ = "ranges";
+        }
+
+        // get node id
+        if (_sdf->HasElement("nodeId"))
+        {
+            node_id_ = _sdf->GetElement("nodeId")->GetValue()->Get(node_id_);
+        }
+        else
+        {
+            node_id_ = 100;
         }
 
         // get beacon file
@@ -103,9 +121,28 @@ namespace gazebo
 
     }
 
-    void GazeboRosPulson::Reset(){}
+    void GazeboRosPulson::Reset()
+    {
+        // reset timer
+        updateTimer_.Reset();
 
-    void GazeboRosPulson::Update(){}
+        // reset error model
+        range_error_model_.reset();
+    }
+
+    void GazeboRosPulson::Update()
+    {
+
+        // get times
+        common::Time sim_time = world_->GetSimTime();
+        double dt = updateTimer_.getTimeSinceLastUpdate().Double();
+
+        // get pose
+        math::Pose pose = link_->GetWorldPose();
+
+        // get appropriate beacon
+
+    }
 
     int GazeboRosPulson::ParseBeaconMapFile(std::string f)
     {

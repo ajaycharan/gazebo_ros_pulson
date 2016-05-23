@@ -39,7 +39,7 @@ namespace gazebo
             // the parent world
             physics::WorldPtr world_;
 
-            // the linke referred to by this plugin
+            // the link referred to by this plugin
             physics::LinkPtr link_;
 
             ros::NodeHandle* nh_;
@@ -54,6 +54,7 @@ namespace gazebo
 
             int node_id_;
             std::vector<beacon> beacons_;
+            int counter_;
 
             UpdateTimer updateTimer_;
             event::ConnectionPtr updateConnection_;
