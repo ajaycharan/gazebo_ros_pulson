@@ -58,6 +58,17 @@ namespace gazebo
             range_topic_ = "ranges";
         }
 
+        // get update rate
+        double rate;
+        if (_sdf->HasElement("updateRate"))
+        {
+            _sdf->GetElement("updateRate")->GetValue()->Get(rate);
+        }
+        else
+        {
+            rate = 120.0;
+        }
+
         // get node id
         if (_sdf->HasElement("nodeId"))
         {
@@ -114,7 +125,7 @@ namespace gazebo
         Reset();
 
         // set rates
-        updateTimer_.setUpdateRate(120.0); // make a parameter
+        updateTimer_.setUpdateRate(rate);
         updateTimer_.Load(world_, _sdf);
 
         // initialize callback
