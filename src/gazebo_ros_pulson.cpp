@@ -12,8 +12,7 @@ namespace gazebo
 
         world_ = _model->GetWorld();
 
-        //////////////////////// Load Params /////////////////////////////
-
+        // namespace
         if (!_sdf->HasElement("robotNamespace"))
         {
             namespace_.clear();
@@ -23,6 +22,7 @@ namespace gazebo
             namespace_ = _sdf->GetElement("robotNamespace")->GetValue()->GetAsString();
         }
 
+        // body name
         if (!_sdf->HasElement("bodyName"))
         {
             link_ = _model->GetLink();
@@ -40,8 +40,7 @@ namespace gazebo
             return;
         }
 
-        ////////////////////////// defaults ///////////////////////////////
-
+        // get topic
         if (_sdf->HasElement("topicName"))
         {
             range_topic_ = _sdf->GetElement("topicName")->GetValue()->GetAsString();
@@ -51,6 +50,7 @@ namespace gazebo
             range_topic_ = "ranges";
         }
 
+        // get beacon file
         std::string beacon_map_file;
         if (_sdf->HasElement("beaconMapFile"))
         {
@@ -62,34 +62,44 @@ namespace gazebo
             return;
         }
 
-        int r = ParseBeaconMapFile(beacon_map_file);
+        // get package path
+        std::string path = ros::package::getPath("gazebo_ros_pulson");
+
+        // parse beacon map
+        int r = ParseBeaconMapFile(path + "/" + "config/" + beacon_map_file);
         if (r != 0)
         {
             ROS_ERROR("GazeboRosPulson plugin can not open beaconMapFile\n");
             return;
         }
 
+        // initialize error model
         range_error_model_.Load(_sdf);
 
-        ////////////////////////// ROS ////////////////////////////////
-
+        // ensure ros is initialized
         if (!ros::isInitialized())
         {
             ROS_FATAL("A ROS node for Gazebo has not been initialized, unable to load plugin.\n");
             return;
         }
 
+        // init node handle
         nh_ = new ros::NodeHandle(namespace_);
+
+        // publishers
         range_pub_ = nh_->advertise<pulson_ros::RangeMeasurement>(range_topic_, 1000);
 
+        // reset plugin
         Reset();
 
+        // set rates
         updateTimer_.setUpdateRate(120.0); // make a parameter
         updateTimer_.Load(world_, _sdf);
 
-        /////////////////////////////////////////////////////////////////
-        
+        // initialize callback
         updateConnection_ = updateTimer_.Connect(boost::bind(&GazeboRosPulson::Update, this));
+
+        ROS_INFO("GazeboRosPulson plugin loaded!");
 
     }
 
@@ -99,6 +109,8 @@ namespace gazebo
 
     int GazeboRosPulson::ParseBeaconMapFile(std::string f)
     {
+        ROS_INFO("Opening Beacon Map File: %s", f.c_str());
+
         // open file
         std::fstream fs;
         fs.open(f.c_str());

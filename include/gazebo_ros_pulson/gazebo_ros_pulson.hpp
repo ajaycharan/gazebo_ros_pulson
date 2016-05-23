@@ -8,6 +8,7 @@
 
 #include <gazebo/common/Plugin.hh>
 #include <ros/ros.h>
+#include <ros/package.h>
 
 #include <pulson_ros/RangeMeasurement.h>
 #include <hector_gazebo_plugins/sensor_model.h>

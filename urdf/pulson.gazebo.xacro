@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="https://ros.org/wiki/xacro">
+
+    <gazebo>
+        
+        <plugin name="quadrotor_pulson_sim" filename="libgazebo_ros_pulson.so">
+            <updateRate>120.0</updateRate>
+            <bodyName>base_link</bodyName>
+            <topicName>ranges</topicName>
+            <beaconMapFile>beacon_map.yaml</beaconMapFile>
+            <offset>0</offset>
+            <drift>0</drift>
+            <gaussianNoise>0.0</gaussianNoise>
+        </plugin>
+
+    </gazebo>
+
+</robot>
