@@ -53,7 +53,8 @@ namespace gazebo
             std::string range_topic_;
 
             int node_id_;
-            std::vector<beacon> beacons_;
+            std::vector<Beacon> beacons_;
+            int num_beacons_;
             int counter_;
 
             UpdateTimer updateTimer_;

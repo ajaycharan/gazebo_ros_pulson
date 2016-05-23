@@ -61,12 +61,15 @@ namespace gazebo
         // get node id
         if (_sdf->HasElement("nodeId"))
         {
-            node_id_ = _sdf->GetElement("nodeId")->GetValue()->Get(node_id_);
+            _sdf->GetElement("nodeId")->GetValue()->Get(node_id_);
         }
         else
         {
             node_id_ = 100;
         }
+
+        // set counter
+        counter_ = 0;
 
         // get beacon file
         std::string beacon_map_file;
@@ -141,6 +144,22 @@ namespace gazebo
         math::Pose pose = link_->GetWorldPose();
 
         // get appropriate beacon
+        Beacon b = beacons_.at(counter_);
+
+        // compute range
+        double r = pose.pos.Distance(b.x, b.y, b.z) * 1000.0;
+
+        // create message
+        range_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
+        range_.message_id = node_id_;
+        range_.responder_id = b.id;
+        range_.precision_range = static_cast<unsigned int>(r);
+
+        // publish
+        range_pub_.publish(range_);
+
+        // update counter
+        counter_ = (counter_ + 1) % num_beacons_;
 
     }
 
@@ -156,14 +175,18 @@ namespace gazebo
         YAML::Node map = YAML::LoadFile(f.c_str());
         assert(map.IsSequence());
 
+        num_beacons_ = map.size();
+
         // read beacon locations
-        for (int i = 0; i < map.size(); i++)
+        for (int i = 0; i < num_beacons_; i++)
         {
-            beacon b;
+            Beacon b;
             b.x = (double) map[i]["x"].as<double>();
             b.y = (double) map[i]["y"].as<double>();
             b.z = (double) map[i]["z"].as<double>();
             b.id = (int) map[i]["id"].as<int>();
+
+            ROS_INFO("Beacon %d at : %f %f %f", b.id, b.x, b.y, b.z);
 
             beacons_.push_back(b);
         }
