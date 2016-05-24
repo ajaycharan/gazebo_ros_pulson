@@ -105,9 +105,6 @@ namespace gazebo
             return;
         }
 
-        // initialize error model
-        range_error_model_.Load(_sdf);
-
         // ensure ros is initialized
         if (!ros::isInitialized())
         {
@@ -140,8 +137,6 @@ namespace gazebo
         // reset timer
         updateTimer_.Reset();
 
-        // reset error model
-        range_error_model_.reset();
     }
 
     void GazeboRosPulson::Update()

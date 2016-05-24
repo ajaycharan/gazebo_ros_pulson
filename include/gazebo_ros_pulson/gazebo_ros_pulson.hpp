@@ -11,8 +11,7 @@
 #include <ros/package.h>
 
 #include <pulson_ros/RangeMeasurement.h>
-#include <hector_gazebo_plugins/sensor_model.h>
-#include <hector_gazebo_plugins/update_timer.h>
+#include <gazebo_ros_pulson/update_timer.h>
 #include <gazebo_ros_pulson/beacon.h>
 
 #include <gazebo/physics/physics.hh>
@@ -46,7 +45,6 @@ namespace gazebo
             ros::Publisher range_pub_;
             
             pulson_ros::RangeMeasurement range_;
-            SensorModel range_error_model_;
 
             std::string namespace_;
             std::string link_name_;

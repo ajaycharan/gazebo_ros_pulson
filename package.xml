@@ -45,18 +45,13 @@
   <build_depend>gazebo</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
-  <build_depend>hector_gazebo_plugins</build_depend>
   <build_depend>pulson_ros</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
-  <run_depend>hector_gazebo_plugins</run_depend>
   <run_depend>pulson_ros</run_depend>
-  <run_depend>dynaimc_reconfigure</run_depend>
-
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
